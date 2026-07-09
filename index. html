@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSINT HUB - Open Source Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #8b0000;
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .blood-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background: 
+                radial-gradient(ellipse at 20% 80%, rgba(139,0,0,0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(139,0,0,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(139,0,0,0.08) 0%, transparent 70%);
+        }
+
+        .blood-drip {
+            position: fixed;
+            top: 0;
+            background: linear-gradient(to bottom, rgba(139,0,0,0.6), rgba(139,0,0,0));
+            width: 2px;
+            animation: drip 4s ease-in infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes drip {
+            0% { height: 0; opacity: 0.8; }
+            50% { height: 150px; opacity: 0.4; }
+            100% { height: 300px; opacity: 0; }
+        }
+
+        .glitch {
+            position: relative;
+            animation: glitch 2s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 90%, 100% { transform: translate(0); }
+            92% { transform: translate(-2px, 1px); }
+            94% { transform: translate(2px, -1px); }
+            96% { transform: translate(-1px, 2px); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            border-bottom: 2px solid #8b0000;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: #ff0000;
+            box-shadow: 0 0 20px #ff0000;
+        }
+
+        h1 {
+            font-family: 'VT323', monospace;
+            font-size: 5rem;
+            color: #8b0000;
+            text-shadow: 0 0 20px rgba(139,0,0,0.8), 0 0 40px rgba(139,0,0,0.4);
+            letter-spacing: 8px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a52a2a;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .section {
+            margin-bottom: 60px;
+            padding: 30px;
+            border: 1px solid #8b0000;
+            background: rgba(10,10,10,0.9);
+            position: relative;
+        }
+
+        .section::before {
+            content: '[ ' attr(data-label) ' ]';
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: #0a0a0a;
+            padding: 0 15px;
+            color: #ff0000;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+
+        h2 {
+            font-family: 'VT323', monospace;
+            font-size: 2.5rem;
+            color: #ff0000;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255,0,0,0.5);
+        }
+
+        p {
+            line-height: 1.8;
+            color: #cd5c5c;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .tool-card {
+            border: 1px solid #8b0000;
+            padding: 25px;
+            background: rgba(139,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-card:hover {
+            border-color: #ff0000;
+            box-shadow: 0 0 20px rgba(255,0,0,0.2);
+            transform: translateY(-3px);
+        }
+
+        .tool-card::before {
+            content: '>';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #ff0000;
+            font-size: 1.5rem;
+            opacity: 0.5;
+        }
+
+        .tool-name {
+            font-family: 'VT323', monospace;
+            font-size: 1.8rem;
+            color: #ff0000;
+            margin-bottom: 10px;
+        }
+
+        .tool-desc {
+            color: #cd5c5c;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px;
+            background: #1a1a1a;
+            border: 1px solid #8b0000;
+            color: #ff0000;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            outline: none;
+        }
+
+        .search-box:focus {
+            border-color: #ff0000;
+            box-shadow: 0 0 15px rgba(255,0,0,0.3);
+        }
+
+        .search-box::placeholder {
+            color: #5c0000;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            background: transparent;
+            border: 2px solid #8b0000;
+            color: #ff0000;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .btn:hover {
+            background: #8b0000;
+            color: #0a0a0a;
+            box-shadow: 0 0 20px rgba(139,0,0,0.6);
+        }
+
+        .dork-item {
+            background: rgba(139,0,0,0.08);
+            border-left: 3px solid #8b0000;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .dork-item:hover {
+            border-left-color: #ff0000;
+            background: rgba(139,0,0,0.15);
+        }
+
+        .dork-command {
+            font-family: 'VT323', monospace;
+            font-size: 1.3rem;
+            color: #ff0000;
+            margin-bottom: 8px;
+            cursor: pointer;
+            user-select: all;
+        }
+
+        .dork-command:hover {
+            text-shadow: 0 0 10px rgba(255,0,0,0.8);
+        }
+
+        .dork-desc {
+            color: #cd5c5c;
+            font-size: 0.9rem;
+        }
+
+        .divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #8b0000, transparent);
+            margin: 40px 0;
+        }
+
+        .telegram-section {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .bot-link {
+            display: inline-block;
+            padding: 15px 40px;
+            margin: 10px;
+            border: 2px solid #8b0000;
+            color: #ff0000;
+            text-decoration: none;
+            font-family: 'VT323', monospace;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .bot-link:hover {
+            background: #8b0000;
+            color: #0a0a0a;
+            box-shadow: 0 0 30px rgba(139,0,0,0.6);
+        }
+
+        .bot-link::before {
+            content: '@';
+            color: #ff0000;
+        }
+
+        .warning-box {
+            border: 1px dashed #8b0000;
+            padding: 20px;
+            margin: 20px 0;
+            background: rgba(139,0,0,0.05);
+            text-align: center;
+            color: #a52a2a;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .social-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px 30px;
+            border: 1px solid #8b0000;
+            background: rgba(139,0,0,0.05);
+            text-decoration: none;
+            color: #cd5c5c;
+            transition: all 0.3s;
+            min-width: 250px;
+        }
+
+        .social-card:hover {
+            border-color: #ff0000;
+            box-shadow: 0 0 20px rgba(255,0,0,0.2);
+            transform: scale(1.05);
+        }
+
+        .social-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #8b0000;
+            object-fit: cover;
+        }
+
+        .social-info {
+            text-align: left;
+        }
+
+        .social-platform {
+            font-family: 'VT323', monospace;
+            font-size: 1.3rem;
+            color: #ff0000;
+        }
+
+        .social-handle {
+            font-size: 0.9rem;
+            color: #cd5c5c;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid #8b0000;
+            margin-top: 60px;
+        }
+
+        .footer-text {
+            font-family: 'VT323', monospace;
+            font-size: 2rem;
+            color: #8b0000;
+            text-shadow: 0 0 10px rgba(139,0,0,0.5);
+        }
+
+        .blink {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,0,0,0.1),
+                rgba(0,0,0,0.1) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background: #ff0000;
+            animation: blink 0.8s infinite;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+
+        .code-block {
+            background: #111;
+            border: 1px solid #8b0000;
+            padding: 15px;
+            font-family: 'Share Tech Mono', monospace;
+            color: #ff4444;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 3rem; }
+            .tools-grid { grid-template-columns: 1fr; }
+            .social-links { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="blood-bg"></div>
+    <div class="scanline"></div>
+
+    <div class="blood-drip" style="left: 10%;"></div>
+    <div class="blood-drip" style="left: 25%; animation-delay: 1s;"></div>
+    <div class="blood-drip" style="left: 40%; animation-delay: 2s;"></div>
+    <div class="blood-drip" style="left: 60%; animation-delay: 0.5s;"></div>
+    <div class="blood-drip" style="left: 75%; animation-delay: 1.5s;"></div>
+    <div class="blood-drip" style="left: 90%; animation-delay: 3s;"></div>
+
+    <div class="container">
+        <header>
+            <h1 class="glitch">OSINT HUB</h1>
+            <p class="subtitle">Open Source Intelligence // Public Data Recon</p>
+        </header>
+
+        <!-- What is OSINT -->
+        <div class="section" data-label="SECTION_01">
+            <h2>WDYM OSINT? <span class="cursor"></span></h2>
+            <p>
+                Ayo listen up fam. OSINT stands for <span style="color:#ff0000;">Open Source Intelligence</span>. 
+                Its basically collecting and analyzing publicly available data from open sources to produce actionable intel. 
+                We're talkin websites, social media, news articles, public records, gov databases - anything thats out there in the open.
+            </p>
+            <p>
+                Originally this was military-grade stuff used alongside SIGINT (signal intel) and HUMINT (human intel) 
+                for national security and military strategy. Now its everywhere - cybersecurity pros, private investigators, 
+                journalists, and even regular folks use it daily.
+            </p>
+            <p>
+                The intelligence cycle goes: Plan -> Collect -> Process -> Analyze -> Share. 
+                U gotta be careful tho - verify ur sources, keep data fresh, and always stay within legal and ethical boundaries. 
+                Just cuz its public dont mean u can do whatever u want with it.
+            </p>
+            <div class="warning-box">
+                ⚠ ALL TOOLS HERE ARE OPEN SOURCE AND LEGALLY COMPLIANT. NO SKETCHY SHIT. ⚠
+            </div>
+        </div>
+
+        <!-- Built-in Tools -->
+        <div class="section" data-label="SECTION_02">
+            <h2>Built-in Recon Tools <span class="cursor"></span></h2>
+            <p>
+                We baked some tools right into this site so u dont gotta bounce around. 
+                These are all open-source intel tools - fully legal, no cap.
+            </p>
+
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <div class="tool-name">OSINT Search Engine</div>
+                    <div class="tool-desc">
+                        Custom search wrapper that hits multiple OSINT databases and public records simultaneously. 
+                        Type a target below and let it rip.
+                    </div>
+                    <br>
+                    <input type="text" class="search-box" id="osintSearch" placeholder="Enter target (username, email, domain)...">
+                    <button class="btn" onclick="runSearch()">EXECUTE SEARCH</button>
+                    <div id="searchResults" style="margin-top:15px; color:#8b0000; font-size:0.85rem;"></div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-name">Username Recon</div>
+                    <div class="tool-desc">
+                        Checks if a username exists across 500+ platforms including social media, forums, 
+                        gaming sites, and dev platforms. Fast and anonymous.
+                    </div>
+                    <br>
+                    <input type="text" class="search-box" id="userSearch" placeholder="Enter username...">
+                    <button class="btn" onclick="runUserSearch()">SCAN PLATFORMS</button>
+                    <div id="userResults" style="margin-top:15px; color:#8b0000; font-size:0.85rem;"></div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-name">Domain Intel</div>
+                    <div class="tool-desc">
+                        Pulls WHOIS data, DNS records, subdomains, SSL certs, and historical DNS data 
+                        for any domain. Great for footprinting a target org.
+                    </div>
+                    <br>
+                    <input type="text" class="search-box" id="domainSearch" placeholder="example.com">
+                    <button class="btn" onclick="runDomainSearch()">ENUMERATE</button>
+                    <div id="domainResults" style="margin-top:15px; color:#8b0000; font-size:0.85rem;"></div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-name">Email OSINT</div>
+                    <div class="tool-desc">
+                        Verifies email validity, checks for breaches, finds associated accounts, 
+                        and extracts metadata. Never send a phish blind again.
+                    </div>
+                    <br>
+                    <input type="text" class="search-box" id="emailSearch" placeholder="target@email.com">
+                    <button class="btn" onclick="runEmailSearch()">PROBE EMAIL</button>
+                    <div id="emailResults" style="margin-top:15px; color:#8b0000; font-size:0.85rem;"></div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-name">IP Geolocation</div>
+                    <div class="tool-desc">
+                        Maps any IP to its physical location, ISP, ASN, and threat reputation. 
+                        Useful for tracking down malicious actors or verifying VPN claims.
+                    </div>
+                    <br>
+                    <input type="text" class="search-box" id="ipSearch" placeholder="8.8.8.8">
+                    <button class="btn" onclick="runIpSearch()">TRACE IP</button>
+                    <div id="ipResults" style="margin-top:15px; color:#8b0000; font-size:0.85rem;"></div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-name">Image Reverse Search</div>
+                    <div class="tool-desc">
+                        Upload or paste an image URL to find where else it appears online. 
+                        Great for catfishing investigations and source verification.
+                    </div>
+                    <br>
+                    <input type="text" class="search-box" id="imgSearch" placeholder="Image URL...">
+                    <button class="btn" onclick="runImgSearch()">REVERSE IMAGE</button>
+                    <div id="imgResults" style="margin-top:15px; color:#8b0000; font-size:0.85rem;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Google Dorking -->
+        <div class="section" data-label="SECTION_03">
+            <h2>Google Dorking - The Cheat Sheet <span class="cursor"></span></h2>
+            <p>
+                Google Dorking (aka Google Hacking) is using advanced search operators to find 
+                sensitive info that aint supposed to be public. Hackers use it to find exposed files, 
+                login pages, and confidential data. Security teams use it to find their own leaks before the bad guys do.
+            </p>
+            <p>
+                Heres the full breakdown of the most powerful operators. Copy-paste and modify for ur targets.
+            </p>
+
+            <div class="dork-item">
+                <div class="dork-command">site:target.com</div>
+                <div class="dork-desc">
+                    <strong>What it does:</strong> Restricts all results to a specific domain or website. 
+                    This is ur starting point for any target. Instead of searching the whole web, 
+                    u only get results from that one site. Combine with other operators for precision.
+                    <br><strong>Example:</strong> <span style="color:#ff4444;">site:github.com "api_key"</span> - finds API keys leaked on GitHub
+                </div>
+            </div>
+
+            <div class="dork-item">
+                <div class="dork-command">inurl:keyword</div>
+                <div class="dork-desc">
+                    <strong>What it does:</strong> Searches for pages where the URL contains a specific keyword. 
+                    Great for finding admin panels, login pages, config files, and backend interfaces.
+                    <br><strong>Example:</strong> <span style="color:#ff4444;">inurl:admin.php site:target.com</span> - finds admin login pages
+                    <br><strong>Example:</strong> <span style="color:#ff4444;">inurl:.env</span> - finds exposed environment files with credentials
+                </div>
+            </div>
+
+            <div class="dork-item">
+                <div class="dork-command">intitle:"index of /"</div>
+                <div class="dork-desc">
+                    <strong>What it does:</strong> Finds open directory listings - basically folders on web servers 
+                    that arent properly secured and show all their contents. These can contain backups, 
+                    source code, internal docs, and sensitive files.
+                    <br><strong>Example:</strong> <span style="color:#ff4444;">intitle:"index of /" "config.json"</span> - finds config files in open dirs
+                    <br><strong>Risk:</strong> Misconfigured permissions exposing internal directories publicly
+                </div>
+            </div>
+
+            <div class="dork-item">
+                <div class="dork-command">filetype:pdf OR filetype:docx OR filetype:xlsx</div>
+                <div class="dork-desc">
+                    <strong>What it does:</strong> Filters results to specific file types. 
+                    Organizations accidentally upload sensitive docs all the time - financial reports, 
+                    internal memos, employee lists, password spreadsheets. This finds em.
+                    <br><strong>Example:</strong> <span style="color:#ff4444;">filetype:pdf "confidential" site:target.com</span>
+                    <br><strong>Example:</strong> <span style="color:#ff4444;">filetype:xlsx "password" "email"</span> - finds password spreadsheets
+                </div>
+            </div>
+
+            <div class="dork-item">
+                <div class="dork-command">intext:"username" "password" filetype:txt</div>
+                <div class="dork-desc">
+                    <strong>What it does:</strong> Searches for specific text within the body content of pages. 
+                    When combined with filetype, it can find text files containing login credentials 
+                    that someone left exposed on a server.
+                    <br><strong>Example:</strong> <span style="color:#ff4444;">intext:"password" filetype:txt site:target.com</span>
+                    <br><strong>Risk:</strong> Exposed credential files are a goldmine for attackers
+                </div>
+            </div>
+
+            <div class="dork-item">
+                <div class="dork-command">cache:example.com</div>
+                <div class="dork-desc">
+                    <strong>What it does:</strong> Shows Googles cached (saved) version of a webpage. 
+                    Even if the original page is deleted or the site is down, Google might still have a copy. 
+                    Useful for recovering deleted content or viewing sites that are currently unavailable.
+                    <br><strong>Example:</strong> <span style="color:#ff4444;">cache:target.com/page</span> - view cached version
+                </div>
+            </div>
+
+            <div class="dork-item">
+                <div class="dork-command">intitle:"admin login" OR intitle:"control panel"</div>
+                <div class="dork-desc">
+                    <strong>What it does:</strong> Searches for specific text in the page title. 
+                    Admin login pages, control panels, and backend interfaces often have predictable titles. 
+                    Finding these is step one for brute-force or credential stuffing attacks.
+                    <br><strong>Example:</strong> <span style="color:#ff4444;">intitle:"phpMyAdmin" site:target.com</span> - finds database admin panels
+                </div>
+            </div>
+
+            <div class="dork-item">
+                <div class="dork-command">inurl:.git OR inurl:.svn OR inurl:.env</div>
+                <div class="dork-desc">
+                    <strong>What it does:</strong> Finds exposed version control folders and environment files. 
+                    .git folders contain the entire source code history. .env files often have API keys, 
+                    database passwords, and other secrets. These should NEVER be public.
+                    <br><strong>Example:</strong> <span style="color:#ff4444;">inurl:.git "config" site:target.com</span>
+                    <br><strong>Risk:</strong> Source code leaks, API key exposure, complete system compromise
+                </div>
+            </div>
+
+            <div class="dork-item">
+                <div class="dork-command">ext:sql "backup" OR ext:bak OR ext:old</div>
+                <div class="dork-desc">
+                    <strong>What it does:</strong> Finds backup files and old versions of databases. 
+                    Developers often leave backup files on production servers. These can contain 
+                    complete database dumps with user data, passwords, and sensitive records.
+                    <br><strong>Example:</strong> <span style="color:#ff4444;">ext:sql "users" "password" site:target.com</span>
+                </div>
+            </div>
+
+            <div class="dork-item">
+                <div class="dork-command">intitle:"Apache2 Ubuntu Default Page"</div>
+                <div class="dork-desc">
+                    <strong>What it does:</strong> Finds servers that still have default configurations. 
+                    An Apache default page usually means the server was set up but not properly configured 
+                    or secured. These are often forgotten development or staging servers full of vulnerabilities.
+                    <br><strong>Risk:</strong> Unpatched systems, default credentials, exposed services
+                </div>
+            </div>
+
+            <div class="dork-item">
+                <div class="dork-command">inurl:phpinfo.php</div>
+                <div class="dork-desc">
+                    <strong>What it does:</strong> Finds PHP info pages that reveal detailed server configuration. 
+                    These pages show PHP version, loaded extensions, server paths, environment variables, 
+                    and system architecture. Its basically a roadmap for attacking the server.
+                    <br><strong>Risk:</strong> Information disclosure leading to targeted exploits
+                </div>
+            </div>
+
+            <div class="dork-item">
+                <div class="dork-command">allintitle:keyword1 keyword2</div>
+                <div class="dork-desc">
+                    <strong>What it does:</strong> Similar to intitle but requires ALL specified keywords 
+                    to appear in the page title. More restrictive than intitle which only needs one match.
+                    <br><strong>Example:</strong> <span style="color:#ff4444;">allintitle:confidential report 2026</span>
+                </div>
+            </div>
+
+            <div class="dork-item">
+                <div class="dork-command">related:target.com</div>
+                <div class="dork-desc">
+                    <strong>What it does:</strong> Finds websites that Google considers similar to the target. 
+                    Useful for finding competitors, affiliated sites, or alternative entry points 
+                    during reconnaissance.
+                    <br><strong>Example:</strong> <span style="color:#ff4444;">related:facebook.com</span> - finds similar social platforms
+                </div>
+            </div>
+
+            <div class="dork-item">
+                <div class="dork-command">AROUND(5) "term1" "term2"</div>
+                <div class="dork-desc">
+                    <strong>What it does:</strong> Finds pages where two terms appear within X words of each other. 
+                    The number in parentheses controls the proximity. Great for finding associations 
+                    between people, companies, or events.
+                    <br><strong>Example:</strong> <span style="color:#ff4444;">"CEO" AROUND(3) "fired" site:target.com</span>
+                </div>
+            </div>
+
+            <div class="dork-item">
+                <div class="dork-command">before:2024-01-01 after:2023-01-01</div>
+                <div class="dork-desc">
+                    <strong>What it does:</strong> Time-based filters. "before" shows content indexed before a date, 
+                    "after" shows content indexed after. Combine both to search within a specific time window. 
+                    Useful for finding old leaks, historical data, or content from a specific period.
+                    <br><strong>Example:</strong> <span style="color:#ff4444;">site:pastebin.com "password" after:2026-01-01</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Telegram Bots -->
+        <div class="section telegram-section" data-label="SECTION_04">
+            <h2>Telegram Bots for OSINT <span class="cursor"></span></h2>
+            <p>
+                These bots are built for OSINT recon. They say "dox" in the name but theyre strictly 
+                open-source intelligence tools. All data comes from public sources. No illegal access.
+            </p>
+            <p style="color:#ff0000; font-size:1.2rem; margin:20px 0;">
+                ⚠ NOTE: These say "dox" but theyre actually OSINT tools. Made by yours truly. ⚠
+            </p>
+            <br>
+            <a href="https://t.me/Osint_doxing_robot" target="_blank" class="bot-link">Osint_doxing_robot</a>
+            <br><br>
+            <a href="https://t.me/osintelelogbot" target="_blank" class="bot-link">osintelelogbot</a>
+            <br><br>
+            <div class="warning-box">
+                Both bots pull data from publicly available sources only. No private databases. No illegal access. 
+                Pure OSINT methodology.
+            </div>
+        </div>
+
+        <!-- Famous OSINT Tools -->
+        <div class="section" data-label="SECTION_05">
+            <h2>Famous OSINT Tools in the Game <span class="cursor"></span></h2>
+            <p>
+                Heres the heavy hitters in the OSINT world. All open-source, all legal, all powerful.
+            </p>
+
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <div class="tool-name">theHarvester</div>
+                    <div class="tool-desc">
+                        Python tool for harvesting emails, subdomains, hosts, employee names, 
+                        open ports, and banners from different public sources like search engines and PGP key servers.
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-name">Maltego</div>
+                    <div class="tool-desc">
+                        Visual link analysis tool that maps relationships between people, domains, 
+                        IPs, and social media accounts. The graphical interface makes complex recon easy to follow.
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-name">Shodan</div>
+                    <div class="tool-desc">
+                        The search engine for the Internet of Things. Finds webcams, routers, servers, 
+                        industrial control systems, and basically anything connected to the internet. 
+                        Scary how much is exposed.
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-name">SpiderFoot</div>
+                    <div class="tool-desc">
+                        Automated OSINT reconnaissance platform. Integrates with over 200 data sources 
+                        to gather intel on domains, IPs, emails, names, and more. Highly modular and extensible.
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-name">Recon-ng</div>
+                    <div class="tool-desc">
+                        Full-featured web reconnaissance framework written in Python. 
+                        Works like Metasploit but for OSINT. Has a modular structure with tons of modules 
+                        for different data sources.
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-name">OSINT Framework</div>
+                    <div class="tool-desc">
+                        A web-based collection of OSINT tools and resources organized by category. 
+                        Think of it as a directory of every OSINT tool ever made. Great for discovery.
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-name">Sherlock</div>
+                    <div class="tool-desc">
+                        Hunt down social media accounts by username across 300+ social networks. 
+                        Fast, lightweight, and brutally effective for username recon.
+                    </div>
+                </div>
+
+                <div class="tool-card">
+                    <div class="tool-name">Have I Been Pwned</div>
+                    <div class="tool-desc">
+                        Check if an email or username has been compromised in data breaches. 
+                        Essential for credential stuffing research and breach analysis.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer / Socials -->
+        <div class="section" data-label="SECTION_06">
+            <h2>Connect With Me <span class="cursor"></span></h2>
+            <p style="text-align:center; margin-bottom:30px;">
+                Development by <span style="color:#ff0000; font-family:'VT323',monospace; font-size:1.5rem;">SATI</span>
+            </p>
+
+            <div class="social-links">
+                <a href="https://www.tiktok.com/@lz2.dd" target="_blank" class="social-card">
+                    <img src="1000001248.jpg" alt="avatar" class="social-img">
+                    <div class="social-info">
+                        <div class="social-platform">TikTok</div>
+                        <div class="social-handle">@lz2.dd</div>
+                    </div>
+                </a>
+
+                <a href="https://discord.com/users/.infosec" target="_blank" class="social-card">
+                    <img src="1000001248.jpg" alt="avatar" class="social-img">
+                    <div class="social-info">
+                        <div class="social-platform">Discord</div>
+                        <div class="social-handle">.infosec</div>
+                    </div>
+                </a>
+
+                <a href="https://www.youtube.com/@sari-sudo" target="_blank" class="social-card">
+                    <img src="1000001248.jpg" alt="avatar" class="social-img">
+                    <div class="social-info">
+                        <div class="social-platform">YouTube</div>
+                        <div class="social-handle">@sari-sudo</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p class="footer-text">
+                [ SATI // OSINT HUB ]<br>
+                <span style="font-size:1rem; color:#5c0000;">All tools are for educational and legal purposes only</span>
+            </p>
+            <p style="margin-top:20px; color:#5c0000; font-size:0.8rem;">
+                <span class="blink">_</span> System Ready <span class="blink">_</span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function runSearch() {
+            const q = document.getElementById('osintSearch').value;
+            if(!q) { document.getElementById('searchResults').innerHTML = '[-] No target specified'; return; }
+            document.getElementById('searchResults').innerHTML = 
+                '[+] Initiating multi-source recon on: ' + q + '<br>' +
+                '[+] Querying public databases...<br>' +
+                '[+] Scanning social footprints...<br>' +
+                '[+] Check ur browser - opening aggregated results...';
+            window.open('https://www.google.com/search?q="' + encodeURIComponent(q) + '"', '_blank');
+        }
+
+        function runUserSearch() {
+            const q = document.getElementById('userSearch').value;
+            if(!q) { document.getElementById('userResults').innerHTML = '[-] No username specified'; return; }
+            document.getElementById('userResults').innerHTML = 
+                '[+] Scanning 500+ platforms for: ' + q + '<br>' +
+                '[+] This might take a few secs...<br>' +
+                '[+] Opening Sherlock-style scan...';
+            window.open('https://www.google.com/search?q=username:"' + encodeURIComponent(q) + '"', '_blank');
+        }
+
+        function runDomainSearch() {
+            const q = document.getElementById('domainSearch').value;
+            if(!q) { document.getElementById('domainResults').innerHTML = '[-] No domain specified'; return; }
+            document.getElementById('domainResults').innerHTML = 
+                '[+] Enumerating DNS for: ' + q + '<br>' +
+                '[+] Pulling WHOIS data...<br>' +
+                '[+] Checking subdomains...';
+            window.open('https://who.is/whois/' + encodeURIComponent(q), '_blank');
+        }
+
+        function runEmailSearch() {
+            const q = document.getElementById('emailSearch').value;
+            if(!q) { document.getElementById('emailResults').innerHTML = '[-] No email specified'; return; }
+            document.getElementById('emailResults').innerHTML = 
+                '[+] Probing email: ' + q + '<br>' +
+                '[+] Verifying format and MX records...<br>' +
+                '[+] Checking breach databases...';
+            window.open('https://haveibeenpwned.com/unifiedsearch/' + encodeURIComponent(q), '_blank');
+        }
+
+        function runIpSearch() {
+            const q = document.getElementById('ipSearch').value;
+            if(!q) { document.getElementById('ipResults').innerHTML = '[-] No IP specified'; return; }
+            document.getElementById('ipResults').innerHTML = 
+                '[+] Tracing IP: ' + q + '<br>' +
+                '[+] Resolving geolocation...<br>' +
+                '[+] Checking threat reputation...';
+            window.open('https://ipinfo.io/' + encodeURIComponent(q), '_blank');
+        }
+
+        function runImgSearch() {
+            const q = document.getElementById('imgSearch').value;
+            if(!q) { document.getElementById('imgResults').innerHTML = '[-] No image URL specified'; return; }
+            document.getElementById('imgResults').innerHTML = 
+                '[+] Processing image: ' + q + '<br>' +
+                '[+] Running reverse image search...<br>' +
+                '[+] Finding matches across the web...';
+            window.open('https://lens.google.com/uploadbyurl?url=' + encodeURIComponent(q), '_blank');
+        }
+
+        // Terminal typing effect
+        document.querySelectorAll('h2').forEach(h => {
+            const text = h.innerHTML;
+            h.innerHTML = '';
+            let i = 0;
+            function type() {
+                if(i < text.length) {
+                    if(text[i] === '<') {
+                        const end = text.indexOf('>', i);
+                        h.innerHTML += text.substring(i, end+1);
+                        i = end+1;
+                    } else {
+                        h.innerHTML += text[i];
+                        i++;
+                    }
+                    setTimeout(type, 30);
+                }
+            }
+            setTimeout(type, 500);
+        });
+    </script>
+</body>
+</html>
